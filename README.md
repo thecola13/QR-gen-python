@@ -64,3 +64,4 @@ QR-gen-python/
 - [ ] Avoid QR code capacity limitation in edge cases with URL shortners
 - [ ] Allow the user to embed a logo in the QR code
 - [ ] Compile the code to allow for users to add it to personal CL commands
+- [ ] Allow for bulk QR generation
