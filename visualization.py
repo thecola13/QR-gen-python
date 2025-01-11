@@ -2,7 +2,7 @@ from qrcode import QR
 from PIL import Image, ImageDraw
 from utils import console_log
 
-def render_qr(qr, resolution = 300, border = 2):
+def render_qr(qr, resolution = 300, border = 2, verbosity = 0):
     """
     Renders a QR code as an image.
     Args:
@@ -13,7 +13,8 @@ def render_qr(qr, resolution = 300, border = 2):
         Image: A PIL Image object representing the rendered QR code.
     """
 
-    scale = max(resolution // (qr.size + 4), 10)
+    scale = max((resolution // (qr.size + (2 * border))), 10)
+    console_log(f"Rendering QR code with scale {scale} at resolution {resolution}", 'info', verbosity, 4) 
 
     # Adjust the image size to include the border
     img_size = (qr.size + 2 * border) * scale # border set by default at 2 cells
@@ -26,6 +27,8 @@ def render_qr(qr, resolution = 300, border = 2):
                 for dy in range(scale):
                     for dx in range(scale):
                         img.putpixel(((x + border) * scale + dx, (y + border) * scale + dy), 0)
+    
+    console_log("QR code rendered successfully", 'success', verbosity, 3)
     return img
 
 ###############    Debug visualizations    ###############

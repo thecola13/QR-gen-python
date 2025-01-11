@@ -51,7 +51,7 @@ minimum and maximum versions, and error correction level.''',
 
     try:
         qr = genqr(args.data, args.minversion, args.maxversion, args.ecl, args.verbosity)
-        img = render_qr(qr, args.resolution, args.verbosity)
+        img = render_qr(qr, args.resolution, 2, args.verbosity)
         img.save(args.output)
         console_log(f"QR Code successfully saved to {args.output}!", 'success', args.verbosity, 0)
     except Exception as e:
