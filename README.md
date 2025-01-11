@@ -15,16 +15,21 @@ This aims at being a fast, reliable QR code generator from the command line.
 
 ## Usage
 
-Start by installing the required dependencies:
+Start by cloning the repo:
+```console
+git clone https://github.com/thecola13/QR-gen-python
+cd QR-gen-python
+```
+
+Then, create a virtual environment and install the required dependencies:
 ```console
 python -m pip install --upgrade pip
-pip install argparse
-pip install pillow
+pip install -r requirements.txt
 ```
 
 Then, run the script as follows:
 ```console
-python main.py --data https://github.com/thecola13/QR-gen-python --minversion 2 --maxversion 25 --ecl 4 --verbosity 2 --output github_repo_qr.jpg
+python main.py --data https://github.com/thecola13/QR-gen-python --minversion 2 --maxversion 25 --ecl L --verbosity 2 --output github_repo_qr.jpg
 ```
 
 List of available parameters and flags:
@@ -37,3 +42,25 @@ List of available parameters and flags:
 - (_Optional_) `--verbosity`, `-v`: sets the verbosity level of the script (default: 0);
 - `--help`, `-h`: Outputs the help menu in the command line.
 
+## File content
+- `main.py`: contains the main script and command line argument parser;
+- `qrcode.py`: contains the main functions and classes responsible for QR code generation;
+- `utils.py`: contains utility functions and classes for console logging and error handling;
+- `visualization.py`: contains the main QR code renderer and two debug renderes.
+
+```text
+QR-gen-python/
+├─ README.md
+├─ .gitignore
+├─ requirements.txt
+├─ main.py
+├─ qrcode.py
+├─ utils.py
+└─ visualization.py
+```
+
+## Future expansions
+- [ ] Add support for image transparency
+- [ ] Avoid QR code capacity limitation in edge cases with URL shortners
+- [ ] Allow the user to embed a logo in the QR code
+- [ ] Compile the code to allow for users to add it to personal CL commands
