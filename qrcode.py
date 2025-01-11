@@ -283,7 +283,7 @@ class QR:
 
         console_log(f'Padded payload: {stringify_bytearray(encoded_payload)}', 'info', verbosity, 3)
 
-        self.draw_function_patterns() # Draws timing, alignment and finder patterns. Also, draws mock format and version bits for mask selection
+        self.draw_function_patterns(verbosity) # Draws timing, alignment and finder patterns. Also, draws mock format and version bits for mask selection
 
         console_log(f'Function patterns successfully drawn!', 'success', verbosity, 3)
 
@@ -388,13 +388,32 @@ class QR:
         self.blocks[y][x] = value
         self.isfunction[y][x] = isfunction
 
-    def draw_function_patterns(self):
+    def draw_function_patterns(self, verbosity = 0):
+        """
+        Draws the function patterns (timing, finder, alignment, format, and version bits) on the QR code matrix.
+        Args:
+            verbosity (int, optional): The verbosity level for logging (default is 0).
+        Notes:
+            - Timing patterns are always set.
+            - Finder patterns are set at the top-left, top-right, and bottom-left corners.
+            - Alignment patterns are set for versions greater than 1, avoiding overlap with finder patterns.
+            - Dummy format bits are set and will be replaced after mask selection.
+            - Version bits are set for versions 7 and above.
+        """
+
+        console_log(f'Starting function pattern drawing', 'info', verbosity, 4)
 
         self.set_timing_patterns() # Timing patterns
+
+        console_log(f'Timing patterns successfully set', 'info', verbosity, 4)
 
         self.set_finder_pattern(0, 0) # Top-left finder
         self.set_finder_pattern(self.size - 7, 0) # Top-right finder
         self.set_finder_pattern(0, self.size - 7) # Bottom-left finder
+
+        console_log(f'Finder patterns successfully set', 'info', verbosity, 4)
+
+        count = 0
 
         if self.version != 1: # No need alignment patterns for version 1
             align_pos = self.get_alignment_positions() # Retrieves the positions of the alignment patterns
@@ -402,18 +421,47 @@ class QR:
                 for y in align_pos:
                     if (x, y) not in [(6, 6), (6, self.size - 7), (self.size - 7, 6)]: # Avoids overlapping with finder patterns
                         self.set_alignment_pattern(x, y)
+                        count += 1
+
+        console_log(f'Alignment patterns successfully set (n = {count})', 'info', verbosity, 4)
         
         self.set_format_bits(-1) # Dummy values, will be replaced after mask selection
+
+        console_log(f'Dummy format bits successfully set', 'info', verbosity, 4)
 
         if self.version >= 7: # Version bits are only needed for version 7 and above
             self.set_version_bits() # Version bits
 
+            console_log(f'Version bits successfully set for version {self.version}', 'info', verbosity, 4)
+
     def set_timing_patterns(self):
+        """
+        Sets the timing patterns for the QR code.
+
+        The timing patterns are alternating black and white modules placed in the 6th row and column of the QR code matrix.
+        These patterns help the QR code reader determine the size and orientation of the QR code.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
         for i in range(self.size):
             self.set_block(6, i, (i % 2 == 0), True)
             self.set_block(i, 6, (i % 2 == 0), True)
 
     def set_finder_pattern(self, x, y):
+        """
+        Sets the finder pattern at the specified (x, y) coordinates in the QR code matrix.
+
+        These patterns consist of a 7x7 square of alternating black and white modules with a surrounding border of white modules.
+        They allow for the QR code reader to locate and orient the QR code.
+
+        Args:
+            x (int): The x-coordinate of the top-left corner of the finder pattern.
+            y (int): The y-coordinate of the top-left corner of the finder pattern.
+        """
         for i in range(-1, 8):
             for j in range(-1, 8):
                 is_dark = (
@@ -424,6 +472,14 @@ class QR:
                     self.set_block(x + i, y + j, is_dark, True)
 
     def get_alignment_positions(self):
+        """
+        Calculates the alignment pattern positions for the QR code based on its version.
+
+        The alignment patterns are around the qr code, but positions might overlap with finder patterns.
+
+        Returns:
+            list: A list of integers representing the positions of the alignment patterns.
+        """
         num_positions = self.version // 7 + 2
         step = ((self.version * 8 + num_positions * 3 + 5) 
                 // (num_positions * 4 - 4) * 2)
@@ -431,13 +487,32 @@ class QR:
         return list(reversed(result))
     
     def set_alignment_pattern(self, x, y):
+        """
+        Sets the alignment pattern for the QR code at the specified coordinates.
+
+        These alignment patterns consist of a 5x5 square of alternating black and white modules with a surrounding border of white modules.
+        They help the QR code reader correct for distortion in the QR code.
+
+        Args:
+            x (int): The x-coordinate of the center of the alignment pattern.
+            y (int): The y-coordinate of the center of the alignment pattern.
+        """
         for i in range(-2, 3):
             for j in range(-2, 3):
                 is_dark = max(abs(i), abs(j)) != 1
                 self.set_block(x + i, y + j, is_dark, True)
 
     def set_format_bits(self, mask):
-        data = ecl_lookup[self.ecl][1] << 3 | mask
+        """
+        Sets the format bits for the QR code, which include the error correction level and mask pattern.
+        Args:
+            mask (int): The mask pattern to be applied.
+
+        This method calculates the error correction bits, appends them to the data, and applies an XOR operation with 0x5412 for readability. 
+        It then sets the format bits in the appropriate positions on the QR code matrix, including the top left, bottom left, and top right corners, 
+        as well as the dark module.
+        """
+        data = ecl_lookup[self.ecl][1] << 3 | mask # Combines the error correction level and mask pattern into a single byte
 
         r = int(data)
 
@@ -464,12 +539,24 @@ class QR:
         self.set_block(8, self.size - 8, 1, True) # Dark module
 
     def set_version_bits(self):
+        """
+        Sets the version bits for the QR code.
+
+        This method calculates the version information bits and places them in the appropriate positions
+        in the QR code matrix. The version information is encoded using a BCH code.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
         r = self.version
 
         for _ in range(12):
-            r = (r << 1) ^ ((r >> 11) * 0x1F25)
+            r = (r << 1) ^ ((r >> 11) * 0x1F25) # Calculates BCH encoding
 
-        payload = self.version << 12 | r
+        payload = self.version << 12 | r # Combines the version number and BCH encoding
 
         for i in range(18):
             val = get_bit(payload, i)
