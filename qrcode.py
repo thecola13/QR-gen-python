@@ -279,7 +279,7 @@ class QR:
 
         console_log(f'Successfull QR initialization!', 'success', verbosity, 3)
 
-        encoded_payload = pad_and_terminate(data, self.version, ecl, verbosity)
+        encoded_payload = pad_and_terminate(data, self.version, ecl)
 
         console_log(f'Padded payload: {stringify_bytearray(encoded_payload)}', 'info', verbosity, 3)
 
@@ -287,12 +287,12 @@ class QR:
 
         console_log(f'Function patterns successfully drawn!', 'success', verbosity, 3)
 
-        self.payload = self.prepare_payload(encoded_payload) # Prepares the payload for encoding
+        self.payload = self.prepare_payload(encoded_payload, verbosity) # Prepares the payload for encoding
         
         console_log(f'Prepared payload: {stringify_bytearray(self.payload)}', 'info', verbosity, 3)
         console_log(f'Payload prepared for visualization!', 'success', verbosity, 2)
 
-        self.set_data_bytes() 
+        self.set_data_bytes(verbosity) 
 
         console_log(f'Data bytes successfully set!', 'success', verbosity, 3)
 
@@ -304,7 +304,7 @@ class QR:
                 self.apply_mask(i)
                 self.set_format_bits(i)
 
-                penalty = self.get_penalty()
+                penalty = self.get_penalty(verbosity)
                 console_log(f'Mask {i}: {penalty}', 'info', verbosity, 3)
                 if penalty < min_penalty:
                     min_penalty = penalty
@@ -567,7 +567,15 @@ class QR:
             self.set_block(a, b, val, True)
             self.set_block(b, a, val, True)
 
-    def prepare_payload(self, data):
+    def prepare_payload(self, data, verbosity = 4):
+        """
+        Prepares the payload for QR code generation by dividing the data into piles and adding error correction bytes.
+        Args:
+            data (list): The data to be encoded, represented as a list of bytes.
+        Returns:
+            list: The interleaved data piles with error correction bytes included.
+        """
+
         num_ec_piles = get_num_ec_piles(self.version, self.ecl) # n° of data piles (data + error correction)
         ec_bytes_len = get_ecp_per_pile(self.version, self.ecl) # n° of error correction bytes per pile
         num_raw_bytes = get_num_data_bytes(self.version) // 8 # n° of raw data bytes
@@ -575,8 +583,7 @@ class QR:
         num_short_piles = num_ec_piles - num_raw_bytes % num_ec_piles # n° of "short" piles (with one less byte)
         short_pile_len = num_raw_bytes // num_ec_piles # Length of the "short" pile
 
-        # print(f'num_ec_piles: {num_ec_piles},\nec_piles_len: {ec_bytes_len},\nnum_short_piles: {num_short_piles},\nshort_pile_len: {short_pile_len},\nnum_raw_bytes: {num_raw_bytes}')
-
+        console_log(f'N° of data piles: {num_ec_piles}\nN° of error correction bytes per pile: {ec_bytes_len}\nN° of raw data bytes: {num_raw_bytes}\nN° of short piles: {num_short_piles}\nLength of short pile: {short_pile_len}', 'info', verbosity, 4)
 
         piles = [] # Initializing the list of piles
 
@@ -584,35 +591,39 @@ class QR:
 
         k = 0 # Initializing the index for the data
 
-
-
-
         for i in range(num_ec_piles):
             pile = data[slice(k, k + short_pile_len - ec_bytes_len + (0 if i < num_short_piles else 1))] # Extracting the pile (with extra data for long piles)
 
 
-            # print(f"Block {i}: k={k}, block_len={k + short_pile_len - ec_bytes_len + (0 if i < num_short_piles else 1) - k}")
+            console_log(f'Pile {i} (before padding): {stringify_bytearray(pile)} (len={len(pile)})', 'info', verbosity, 4)
 
             k += len(pile) # Updating the index
 
-            # print(f"Pile {i} (before padding): {pile} (len={len(pile)})")
 
             ecp = rs.remainder(pile) # Calculating the error correction pile
 
             if i < num_short_piles:
                 pile.append(0) # Adding a dummy byte for short piles
 
-            # print(f"Pile {i} (after padding): {pile} (len = {len(pile)}), ECC: {ecp}")
+            console_log(f'Pile {i} (after padding): {stringify_bytearray(pile)} (len={len(pile)})', 'info', verbosity, 4)
 
             piles.append(pile + ecp) # Appending the pile to the list
 
-        # print("Final Piles:")
-        # for idx, p in enumerate(piles):
-        #     print(f"Pile {idx} (len = {len(p)}) = {''.join([f'{el:02X} ' for el in p])}")
+        console_log(f'Piles successfully prepared!', 'success', verbosity, 3)
+        for idx, p in enumerate(piles):
+            console_log(f'Pile {idx}: {stringify_bytearray(p)}', 'info', verbosity, 4)
         
-        return interleave_data(piles, short_pile_len, ec_bytes_len, num_short_piles)
+        return interleave_data(piles, short_pile_len, ec_bytes_len, num_short_piles, verbosity)
 
-    def set_data_bytes(self):
+    def set_data_bytes(self, verbosity = 0):
+        """
+        Sets the data bytes into the QR code matrix.
+        This method iterates over the QR code matrix in a specific pattern to place the data bits
+        into the appropriate positions. It skips function patterns and ensures the data is placed
+        correctly according to the QR code specifications.
+        Args:
+            None
+        """
         
         i = 0 # Index for the payload
 
@@ -628,13 +639,22 @@ class QR:
                     
 
                     if not self.isfunction[posy][posx] and i < len(self.payload) * 8:
-                        # print(f'Setting block at ({posx}, {posy}) with value {get_bit(self.payload[i // 8], i % 8)} (index = {i}, payload = {self.payload[i // 8]:08b})')
+                        console_log(f'Setting block at ({posx}, {posy}) with value {get_bit(self.payload[i // 8], i % 8)} (index = {i}, payload = {self.payload[i // 8]:08b})', 'info', verbosity, 5)
                         self.set_block(posx, posy, get_bit(self.payload[i // 8], 7 - (i % 8)))
                         i += 1
-                    # else:
-                        # print(f'Skipping block at ({posx}, {posy}) because {'it is a function block' if self.isfunction[posy][posx] else 'the payload is exhausted'}')
+                    else:
+                        console_log(f'Skipping block at ({posx}, {posy}) because {'it is a function block' if self.isfunction[posy][posx] else 'the payload is exhausted'}', 'info', verbosity, 5)
     
     def apply_mask(self, mask_index):
+        """
+        Applies a mask to the QR code blocks based on the specified mask index.
+        
+        Args:
+            mask_index (int): The index of the mask pattern to be applied. 
+                      Must be an integer between 0 and 7 inclusive.
+        
+        The mask is applied to each block in the QR code, except for function patterns.
+        """
         mask_collection = {
             0: (lambda x, y: (x + y) % 2 == 0                   ),
             1: (lambda x, y: y % 2 == 0                         ),
@@ -651,27 +671,58 @@ class QR:
             for x in range(self.size):
                 self.blocks[y][x] ^= mask_collection[mask_index](x, y) and (not self.isfunction[y][x])
 
-    def get_penalty(self):
+    def get_penalty(self, verbosity = 0):
+        """
+        Calculates the penalty score for the QR code based on various patterns and criteria.
+        Args:
+            verbosity (int, optional): The verbosity level for logging (default is 0).
+        Returns:
+            int: The total penalty score calculated from row, column, block, and balance penalties.
+        """
 
-        lookup_penalties = [3, 3, 40, 10]
+        lookup_penalties = [3, 3, 40, 10] # Penalty values for different patterns
 
-        result = 0
+        row_res, col_res, block_res, balance_res = 0, 0, 0, 0
 
         for y in range(self.size):
-            result += self.get_bar_penalty([self.blocks[y]], lookup_penalties)
+            row_res += self.get_bar_penalty([self.blocks[y]], lookup_penalties) # Penalty for rows
+
+        console_log(f'Row penalty: {row_res}', 'info', verbosity, 5)
 
         for x in range(self.size):
-            result += self.get_bar_penalty([self.blocks[y][x] for y in range(self.size)], lookup_penalties)
+            col_res += self.get_bar_penalty([self.blocks[y][x] for y in range(self.size)], lookup_penalties) # Penalty for columns
+        
+        console_log(f'Column penalty: {col_res}', 'info', verbosity, 5)
 
-        result += self.get_square_penalty(lookup_penalties)
+        block_res += self.get_square_penalty(lookup_penalties) # Penalty for 2x2 blocks
 
-        result += self.get_balance_penalty(lookup_penalties)
+        console_log(f'Block penalty: {block_res}', 'info', verbosity, 5)
 
-        return result
+        result += self.get_balance_penalty(lookup_penalties) # Penalty for dark module balance
 
-    def get_bar_penalty(self, array, penalties): # Compacting straight-line and finder-lik penalties, generalizing them for both rows and columns
+        console_log(f'Balance penalty: {balance_res}', 'info', verbosity, 5)
+
+        return row_res + col_res + block_res + balance_res
+
+    def get_bar_penalty(self, array, penalties):
+        """
+        Calculates the penalty score for a given row/column of the QR code, combining both straight line and finder-like penalties.
+        Args:
+            array (list): A list representing the row or column of the QR code.
+            penalties (list): A list of penalty values for different QR code patterns.
+        Returns:
+            int: The total penalty score for the given array.
+        """
 
         def check_finder_like(array):
+            """
+            Checks if the given array represents a finder-like pattern.
+            Args:
+                array (list of tuples): A list representing a summary of a row or column of the QR code.
+
+            Returns:
+                bool: True if the array represents a finder-like pattern, False otherwise.
+            """
             if len(array) != 7:
                 raise ValueError("Invalid array length")
         
@@ -682,9 +733,9 @@ class QR:
 
         subres = 0
 
-        hist = []
-        active_color = array[0]
-        streak = 1
+        hist = [] # Initializing the history of the row/column
+        active_color = array[0] # Initializing the active color
+        streak = 1 # Initializing the streak
 
         if active_color:
             hist += [(0, self.size)] # If the first element is black, add a dummy white streak
@@ -711,6 +762,15 @@ class QR:
         return subres
             
     def get_square_penalty(self, penalties):
+        """
+        Calculates the square penalty for the QR code based on the given penalties.
+
+        Args:
+            penalties (list): A list of penalty scores where penalties[2] is the penalty for 2x2 blocks of the same color.
+
+        Returns:
+            int: The total square penalty score.
+        """
 
         subres = 0
 
@@ -722,6 +782,15 @@ class QR:
         return subres
 
     def get_balance_penalty(self, penalties):
+        """
+        Calculates the balance penalty for the QR code based on the proportion of dark modules.
+
+        Args:
+            penalties (list): A list of penalty scores for different conditions.
+
+        Returns:
+            int: The calculated balance penalty.
+        """
 
         num_dark = sum(sum(row) for row in self.blocks)
         num_total = self.size ** 2
@@ -730,7 +799,7 @@ class QR:
 
         k = 0
 
-        while dark_ratio < 0.45 - (k * 0.05) or dark_ratio > 0.55 + (k * 0.05):
+        while dark_ratio < 0.45 - (k * 0.05) or dark_ratio > 0.55 + (k * 0.05): # Calculate the balance penalty
             k += 1
 
         return penalties[3] * k
@@ -847,7 +916,7 @@ def get_num_ec_piles(version, ecl):
     
     return lookup_table[ecl_lookup[ecl][0]][version - 1]
 
-def interleave_data(piles, short_pile_len, n_ec_bytes_per_pile, n_short_piles):
+def interleave_data(piles, short_pile_len, n_ec_bytes_per_pile, n_short_piles, verbosity):
     """
     Interleaves data from multiple piles into a single bytearray, skipping padding bytes in short piles.
     Args:
@@ -865,6 +934,8 @@ def interleave_data(piles, short_pile_len, n_ec_bytes_per_pile, n_short_piles):
             if (i != short_pile_len - n_ec_bytes_per_pile) or (j >= n_short_piles): # skipping padding byte in short piles
                 res.append(pile[i])
     
+    console_log(f'Piles successfully interleaved!', 'success', verbosity, 4)
+
     return res
 
 ###############    QR generation wrapper function    ###############

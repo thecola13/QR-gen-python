@@ -5,6 +5,21 @@ from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
 
 def main():
+    """
+    Main function to parse command-line arguments and generate a QR Code.
+
+    This function sets up an argument parser to handle various command-line options for generating a QR Code.
+    It validates the input data, generates the QR Code, and saves it to the specified output file.
+
+    Command-line arguments:
+        --data, -d (str): Link or data to be encoded in QR Code. Characters not in UTF-8 might cause failures. (required)
+        --output, -o (str): Output file path (default: ./qrcode.png).
+        --resolution, -r (int): Resolution of the QR Code in pixels (default: 300 x 300).
+        --minversion, -mv (int): Force the minimum version of the QR Code (default: 1).
+        --maxversion, -Mv (int): Force the maximum version of the QR Code (default: 40). Be aware that a low enough minimum version could result in failures.
+        --ecl, -e (str): Minimum error correction level: L (7%), M (15%), Q (25%), H (30%) (default: M).
+        --verbosity, -v (int): Verbosity level of the script (default: 0).
+    """
 
     parser = ArgumentParser(prog = 'qrgen',
                             formatter_class = RawDescriptionHelpFormatter,
