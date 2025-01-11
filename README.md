@@ -1,6 +1,10 @@
 # Command Line QR Code Generator
 _Developed by Luca Colaci (3176608)_
 
+<p align="center" width="100%">
+    <img width="33%" src="github_repo_qr.png"> 
+</p>
+
 ## Introduction
 
 This aims at being a fast, reliable QR code generator from the command line.

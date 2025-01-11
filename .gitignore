@@ -1,5 +1,6 @@
 /__pycache__
 /myvenv
 *.png
+!github_repo_qr.png
 *.jpg
 *.jpeg
