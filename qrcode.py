@@ -643,7 +643,7 @@ class QR:
                         self.set_block(posx, posy, get_bit(self.payload[i // 8], 7 - (i % 8)))
                         i += 1
                     else:
-                        console_log(f'Skipping block at ({posx}, {posy}) because {'it is a function block' if self.isfunction[posy][posx] else 'the payload is exhausted'}', 'info', verbosity, 5)
+                        console_log(f'Skipping block at ({posx}, {posy}) because {"it is a function block" if self.isfunction[posy][posx] else "the payload is exhausted"}', 'info', verbosity, 5)
     
     def apply_mask(self, mask_index):
         """
@@ -698,7 +698,7 @@ class QR:
 
         console_log(f'Block penalty: {block_res}', 'info', verbosity, 5)
 
-        result += self.get_balance_penalty(lookup_penalties) # Penalty for dark module balance
+        balance_res += self.get_balance_penalty(lookup_penalties) # Penalty for dark module balance
 
         console_log(f'Balance penalty: {balance_res}', 'info', verbosity, 5)
 
