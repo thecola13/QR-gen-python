@@ -1,5 +1,5 @@
 # Command Line QR Code Generator
-_Developed by Luca Colaci_
+_Developed by Luca Colaci (3176608)_
 
 ## Introduction
 
