@@ -24,7 +24,7 @@ directory, resolution, min and maxm versions, error correction level and extensi
                             epilog = '''Developed by Luca Colaci as a personal project for the 20875 - Software Engineering course at Bocconi University.''')
     
     parser.add_argument('--file', '-f', type = str, help = 'File containing links or data to be encoded in QR Codes. Characters not in UTF-8 might cause failures.', required = True)
-    parser.add_argument('--output', '-o', default = 'qrcodes', type = str, help = 'Output directory path (default: ./qrcodes)', required = False)
+    parser.add_argument('--output', '-o', default = './qrcodes', type = str, help = 'Output directory path (default: ./qrcodes)', required = False)
     parser.add_argument('--resolution', '-r', default = 300, type = int, help = 'Resolution of the QR Codes in pixels (default: 300 x 300).', required = False)
     parser.add_argument('--minversion', '-mv', default = 1, type = int, help = 'Force the minimum version of the QR Codes (default: 1).', required = False)
     parser.add_argument('--maxversion', '-Mv', default = 40, type = int, help = 'Force the maximum version of the QR Codes (default: 40). Be aware that a low enough maximum version could result in failures.', required = False)
