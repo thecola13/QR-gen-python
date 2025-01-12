@@ -279,7 +279,7 @@ class QR:
 
         console_log(f'Successfull QR initialization!', 'success', verbosity, 3)
 
-        encoded_payload = pad_and_terminate(data, self.version, ecl)
+        encoded_payload = pad_and_terminate(data, self.version, ecl, verbosity)
 
         console_log(f'Padded payload: {stringify_bytearray(encoded_payload)}', 'info', verbosity, 3)
 
@@ -338,7 +338,7 @@ class QR:
 
         for version in range(minversion, maxversion + 1): # Uses a bottom-up approach to find the smallest version that can encode the data
             max_capacity = get_capacity(version, ecl) * 8
-            used_capacity = 4 + byte_mode.get_num_char_count_bits(version) + len(data) * 8
+            used_capacity = 4 + byte_mode.get_num_char_count_bits(version) + len(data.encode('utf-8')) * 8
 
             console_log(f'Version {version}: {used_capacity}/{max_capacity}', 'info', verbosity, 3)
 
@@ -807,7 +807,7 @@ class QR:
 
 ###############    Helper functions to QR class    ###############
 
-def pad_and_terminate(data, version, ecl):
+def pad_and_terminate(data, version, ecl, verbosity = 0):
     """
     Pads and terminates the given data according to the QR code specifications.
     Args:
@@ -821,16 +821,27 @@ def pad_and_terminate(data, version, ecl):
     byte_data = BitStream() # Initializing the bit stream
 
     byte_data.append_bits(byte_mode.modebits, 4) # Appending byte mode indicator
+    console_log(f'Byte mode indicator added: {byte_data}', 'info', verbosity, 10)
 
     byte_data.append_bits(len(data), byte_mode.get_num_char_count_bits(version)) # Appending the length of the data
+    console_log(f'Length of data added: {byte_data}', 'info', verbosity, 10)
 
     for char in data:
-        byte_data.append_bits(ord(char), 8)
+        utf8_bytes = char.encode('utf-8')  # Get the UTF-8 encoded bytes
+        console_log(f'Adding character {char} (UTF-8 bytes = {[f"{byte:08b}" for byte in utf8_bytes]})', 'info', verbosity, 15)
+        for byte in utf8_bytes:
+            byte_data.append_bits(byte, 8)  # Append each byte as 8 bits
+            console_log(f'Byte {byte:08b} added: {byte_data}', 'info', verbosity, 15)
+    console_log(f'Final data: {byte_data}', 'info', verbosity, 10)
+
 
     capacity = get_capacity(version, ecl) * 8
 
     byte_data.append_bits(0, min(4, capacity - len(byte_data))) # Adding padding bits (up to 4)
+    console_log(f'Padding bits added: {byte_data}', 'info', verbosity, 10)
+
     byte_data.append_bits(0, - len(byte_data) % 8) # Aligning to byte boundary (final length of data must be a multiple of 8)
+    console_log(f'Aligned to byte boundary: {byte_data}', 'info', verbosity, 10)
 
 
     i = 0
@@ -839,8 +850,11 @@ def pad_and_terminate(data, version, ecl):
         byte_data.append_bits(alternated_padding[i % 2], 8)
         # print(f'adding padding: {alternated_padding[i % 2]}')
         i += 1
+        console_log(f'Alternated padding added: {byte_data}', 'info', verbosity, 15)
+    console_log(f'Final data: {byte_data}', 'info', verbosity, 10)
     
     result = byte_data.convert_to_bytes()
+    console_log(f'Final data: {stringify_bytearray(result)}', 'info', verbosity, 10)
 
     return result
 
