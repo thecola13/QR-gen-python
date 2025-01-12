@@ -48,7 +48,7 @@ List of available parameters and flags:
 - `--help`, `-h`: Outputs the help menu in the command line.
 
 For bulk generation, run:
-``console
+```console
 python bulkgen.py --file links.txt --ecl L --verbosity 2 --output ./qrcodes --extension png
 ```
 
