@@ -7,7 +7,7 @@ _Developed by Luca Colaci (3176608)_
 
 ## Introduction
 
-This aims at being a fast, reliable QR code generator from the command line.
+This aims at being a fast, reliable QR code generator from the command line. Also, natively allows the bulk generation of QR codes from a txt file.
 
 ## Core features
 
