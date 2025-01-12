@@ -24,20 +24,20 @@ def main():
     parser = ArgumentParser(prog = 'qrgen',
                             formatter_class = RawDescriptionHelpFormatter,
                             usage = '''qrgen [-h] --l <link> [--output <output>] [--resolution <resolution>] 
-             [--minversion <minversion>] [--maxversion <maxversion>] [--ecl <ecl>]''',
+             [--minversion <minversion>] [--maxversion <maxversion>] [--ecl <ecl>] [--verbosity <verbosity>]''',
 
                             description = '''A simple CLI QR Code generator in Python, loosely based on Project Nayuki\'s 
 tutorial on QR Code generation. The script generates a QR Code from a given
 link or payload, allowing the user to specify the output file path, resolution,
 minimum and maximum versions, and error correction level.''', 
 
-                            epilog = '''Developed by Luca Colaci as a personal project for the Software Engineering course (2024) at Bocconi University.''')
+                            epilog = '''Developed by Luca Colaci as a personal project for the 20875 - Software Engineering course at Bocconi University.''')
 
     parser.add_argument('--data', '-d', type = str, help = 'Link or data to be encoded in QR Code. Characters not in UTF-8 might cause failures.', required = True)
     parser.add_argument('--output', '-o', default = 'qrcode.png', type = str, help = 'Output file path (default: ./qrcode.png)', required = False)
     parser.add_argument('--resolution', '-r', default = 300, type = int, help = 'Resolution of the QR Code in pixels (default: 300 x 300).', required = False)
     parser.add_argument('--minversion', '-mv', default = 1, type = int, help = 'Force the minimum version of the QR Code (default: 1).', required = False)
-    parser.add_argument('--maxversion', '-Mv', default = 40, type = int, help = 'Force the maximum version of the QR Code (default: 40). Be aware that a low enough minimum version could result in failures.', required = False)
+    parser.add_argument('--maxversion', '-Mv', default = 40, type = int, help = 'Force the maximum version of the QR Code (default: 40). Be aware that a low enough maximum version could result in failures.', required = False)
     parser.add_argument('--ecl', '-e', default = 'M', type = str, help = 'Minimum error correction level: L (7%%), M (15%%), Q (25%%), H (30%%) (default: M).', required = False)
     parser.add_argument('--verbosity', '-v', default = 0, type = int, help = 'Verbosity level of the script (default: 0).', required = False)
 

@@ -1,5 +1,11 @@
+import sys
+
 class CapacityError(ValueError):
     """ Raised when the capacity of the QR code is exceeded """
+    pass
+
+class PathError(ValueError):
+    """ Raised when the path to the file is invalid """
     pass
 
 class bc_colors:
@@ -58,3 +64,4 @@ def handle_error(e, verb):
         verb (int): The verbosity level of the script.
     """
     console_log(f"An error occurred: {e}", 'error', verb, 0)
+    sys.exit(1)
