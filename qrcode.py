@@ -303,9 +303,9 @@ class QR:
             for i in range(8):
                 self.apply_mask(i)
                 self.set_format_bits(i)
-
+                console_log(f'Mask {i}:', 'info', verbosity, 3)
                 penalty = self.get_penalty(verbosity)
-                console_log(f'Mask {i}: {penalty}', 'info', verbosity, 3)
+                console_log(f'Mask {i} total penalty: {penalty}', 'info', verbosity, 3)
                 if penalty < min_penalty:
                     min_penalty = penalty
                     mask = i
@@ -687,20 +687,20 @@ class QR:
         for y in range(self.size):
             row_res += self.get_bar_penalty([self.blocks[y]], lookup_penalties) # Penalty for rows
 
-        console_log(f'Row penalty: {row_res}', 'info', verbosity, 5)
+        console_log(f'  Row penalty: {row_res}', 'info', verbosity, 5)
 
         for x in range(self.size):
             col_res += self.get_bar_penalty([self.blocks[y][x] for y in range(self.size)], lookup_penalties) # Penalty for columns
         
-        console_log(f'Column penalty: {col_res}', 'info', verbosity, 5)
+        console_log(f'  Column penalty: {col_res}', 'info', verbosity, 5)
 
         block_res += self.get_square_penalty(lookup_penalties) # Penalty for 2x2 blocks
 
-        console_log(f'Block penalty: {block_res}', 'info', verbosity, 5)
+        console_log(f'  Block penalty: {block_res}', 'info', verbosity, 5)
 
         balance_res += self.get_balance_penalty(lookup_penalties) # Penalty for dark module balance
 
-        console_log(f'Balance penalty: {balance_res}', 'info', verbosity, 5)
+        console_log(f'  Balance penalty: {balance_res}', 'info', verbosity, 5)
 
         return row_res + col_res + block_res + balance_res
 

@@ -43,21 +43,46 @@ minimum and maximum versions, and error correction level.''',
 
     args = parser.parse_args()
 
-    try: # Check if the payload is in UTF-8
-        checked_payload = args.data.encode('utf-8')
-        console_log(f"Payload is in UTF-8 format.", 'info', args.verbosity)
-    except Exception as e:
-        handle_error(e, args.verbosity)
+    if check_encoding(args.data):
+        console_log("Data is in UTF-8 format.", 'success', args.verbosity, 0)
+        gen_qr(args.data, args.minversion, args.maxversion, args.ecl, args.verbosity, args.resolution, args.output)
+    else:
+        console_log("Data is not in UTF-8 format. Please provide a valid payload.", 'error', args.verbosity, 2)
 
+def check_encoding(payload):
+    """
+    Check if the payload is in UTF-8 format.
+
+    Args:
+        payload (str): The payload to be checked.
+
+    Returns:
+        bool: True if the payload is in UTF-8 format, False otherwise.
+    """
     try:
-        qr = genqr(args.data, args.minversion, args.maxversion, args.ecl, args.verbosity)
-        img = render_qr(qr, args.resolution, 2, args.verbosity)
-        img.save(args.output)
-        console_log(f"QR Code successfully saved to {args.output}!", 'success', args.verbosity, 0)
+        checked_payload = payload.encode('utf-8')
+        return True
+    except:
+        return False
+    
+def gen_qr(data, minversion, maxversion, ecl, verbosity, resolution, output):
+    """
+    Generate a QR Code from the given data.
+
+    Args:
+        data (str): Link or data to be encoded in QR Code.
+        minversion (int): Force the minimum version of the QR Code.
+        maxversion (int): Force the maximum version of the QR Code.
+        ecl (str): Minimum error correction level: L (7%), M (15%), Q (25%), H (30%).
+        verbosity (int): Verbosity level of the script.
+    """
+    try:
+        qr = genqr(data, minversion, maxversion, ecl, verbosity)
+        img = render_qr(qr, resolution, 2, verbosity)
+        img.save(output)
+        console_log(f"QR Code successfully saved to {output}!", 'success', verbosity, 0)
     except Exception as e:
-        handle_error(e, args.verbosity)
-
-
+        handle_error(e, verbosity)
 
 if __name__ == '__main__':
     main()

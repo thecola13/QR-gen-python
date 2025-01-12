@@ -47,7 +47,7 @@ List of available parameters and flags:
 - `--help`, `-h`: Outputs the help menu in the command line.
 
 ## File content
-- `main.py`: contains the main script and command line argument parser;
+- `qrgen.py`: contains the main script and command line argument parser;
 - `qrcode.py`: contains the main functions and classes responsible for QR code generation;
 - `utils.py`: contains utility functions and classes for console logging and error handling;
 - `visualization.py`: contains the main QR code renderer and two debug renderes.
@@ -57,7 +57,7 @@ QR-gen-python/
 ├─ README.md
 ├─ .gitignore
 ├─ requirements.txt
-├─ main.py
+├─ qrgen.py
 ├─ qrcode.py
 ├─ utils.py
 └─ visualization.py
