@@ -16,6 +16,7 @@ This aims at being a fast, reliable QR code generator from the command line.
 - Accepts any payload encodable in Unicode format, and returns it a single byte-mode encoded data segment;
 - Manually set the output dimension of the QR code. This might be overwritten with a minimum resolution for readability purposes, expecially for high-version QRs;
 - Debug any issue by setting a verbosity level.
+- Allows for bulk generation of QR codes from text files
 
 ## Usage
 
@@ -34,6 +35,7 @@ pip install -r requirements.txt
 Then, run the script as follows:
 ```console
 python qrgen.py --data https://github.com/thecola13/QR-gen-python --minversion 2 --maxversion 25 --ecl L --verbosity 2 --output github_repo_qr.jpg
+python bulkgen.py --file links.txt --ecl L --verbosity 2 --output ./qrcodes --extension png
 ```
 
 List of available parameters and flags:
@@ -47,10 +49,12 @@ List of available parameters and flags:
 - `--help`, `-h`: Outputs the help menu in the command line.
 
 ## File content
-- `qrgen.py`: contains the main script and command line argument parser;
+- `qrgen.py`: contains the single QR code generation script and command line argument parser;
+- `bulkgen.py`: contains the bulk QR code generation script and command line argument parser;
 - `qrcode.py`: contains the main functions and classes responsible for QR code generation;
 - `utils.py`: contains utility functions and classes for console logging and error handling;
 - `visualization.py`: contains the main QR code renderer and two debug renderes.
+- `requirements.txt`: contains the required libraries for the program to run
 
 ```text
 QR-gen-python/
@@ -58,6 +62,7 @@ QR-gen-python/
 ├─ .gitignore
 ├─ requirements.txt
 ├─ qrgen.py
+├─ bulkgen.py
 ├─ qrcode.py
 ├─ utils.py
 └─ visualization.py
@@ -68,4 +73,4 @@ QR-gen-python/
 - [ ] Avoid QR code capacity limitation in edge cases with URL shortners
 - [ ] Allow the user to embed a logo in the QR code
 - [ ] Compile the code to allow for users to add it to personal CL commands
-- [ ] Allow for bulk QR generation
+- [x] Allow for bulk QR generation
