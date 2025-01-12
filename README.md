@@ -15,8 +15,8 @@ This aims at being a fast, reliable QR code generator from the command line.
 - Independently set the minimum version, maximum version and error correction level;
 - Accepts any payload encodable in Unicode format, and returns it a single byte-mode encoded data segment;
 - Manually set the output dimension of the QR code. This might be overwritten with a minimum resolution for readability purposes, expecially for high-version QRs;
-- Debug any issue by setting a verbosity level.
-- Allows for bulk generation of QR codes from text files
+- Debug any issue by setting a verbosity level;
+- Allows for bulk generation of QR codes from text files, with a QR code encoding each line of the file.
 
 ## Usage
 
@@ -32,10 +32,9 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-Then, run the script as follows:
+Then, the single QR code generation script can be run as follows:
 ```console
 python qrgen.py --data https://github.com/thecola13/QR-gen-python --minversion 2 --maxversion 25 --ecl L --verbosity 2 --output github_repo_qr.jpg
-python bulkgen.py --file links.txt --ecl L --verbosity 2 --output ./qrcodes --extension png
 ```
 
 List of available parameters and flags:
@@ -48,13 +47,29 @@ List of available parameters and flags:
 - (_Optional_) `--verbosity`, `-v`: sets the verbosity level of the script (default: 0);
 - `--help`, `-h`: Outputs the help menu in the command line.
 
+For bulk generation, run:
+``console
+python bulkgen.py --file links.txt --ecl L --verbosity 2 --output ./qrcodes --extension png
+```
+
+List of available parameters and flags:
+- `--file`, `--f`: File containing links or data to be encoded in QR Codes (be aware that characters not in UTF-8 might cause failures);
+- (_Optional_) `--output`, `-o`: output directory path (default: ./qrcodes);
+- (_Optional_) `--resolution`, `-r`: resolution of the QR Code in pixels (default: 300 x 300);
+- (_Optional_) `--minversion`, `-mv`: force the minimum version of the QR Code (default: 1);
+- (_Optional_) `--maxversion`, `-Mv`: force the maximum version of the QR Code (default: 40);
+- (_Optional_) `--ecl`, `-e`: minimum error correction level: L (7%), M (15%), Q (25%), H (30%) (default: M);
+- (_Optional_) `--extension`, `-ext`: specifies the format in which the QR code code image has to be saved (default: png);
+- (_Optional_) `--verbosity`, `-v`: sets the verbosity level of the script (default: 0);
+- `--help`, `-h`: Outputs the help menu in the command line.
+
 ## File content
 - `qrgen.py`: contains the single QR code generation script and command line argument parser;
 - `bulkgen.py`: contains the bulk QR code generation script and command line argument parser;
 - `qrcode.py`: contains the main functions and classes responsible for QR code generation;
 - `utils.py`: contains utility functions and classes for console logging and error handling;
-- `visualization.py`: contains the main QR code renderer and two debug renderes.
-- `requirements.txt`: contains the required libraries for the program to run
+- `visualization.py`: contains the main QR code renderer and two debug renderes;
+- `requirements.txt`: contains the required libraries for the program to run.
 
 ```text
 QR-gen-python/
