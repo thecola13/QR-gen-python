@@ -33,7 +33,7 @@ pip install -r requirements.txt
 
 Then, run the script as follows:
 ```console
-python main.py --data https://github.com/thecola13/QR-gen-python --minversion 2 --maxversion 25 --ecl L --verbosity 2 --output github_repo_qr.jpg
+python qrgen.py --data https://github.com/thecola13/QR-gen-python --minversion 2 --maxversion 25 --ecl L --verbosity 2 --output github_repo_qr.jpg
 ```
 
 List of available parameters and flags:
