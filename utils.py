@@ -1,4 +1,5 @@
 import sys
+from argparse import ArgumentParser
 
 class CapacityError(ValueError):
     """ Raised when the capacity of the QR code is exceeded """
@@ -6,6 +7,10 @@ class CapacityError(ValueError):
 
 class PathError(ValueError):
     """ Raised when the path to the file is invalid """
+    pass
+
+class ParsingError(ValueError):
+    """ Raised when the parser fails to parse the CL input"""
     pass
 
 class bc_colors:
@@ -65,3 +70,10 @@ def handle_error(e, verb):
     """
     console_log(f"An error occurred: {e}", 'error', verb, 0)
     sys.exit(1)
+
+class CustomArgParser(ArgumentParser):
+    """ Custom ArgumentParser class to handle errors and print help message """
+
+    def error(self, message):
+        """ Override the error method to print the help message """
+        raise ParsingError(message + '\n' + 'Use -h or --help for more information on proper usage.')

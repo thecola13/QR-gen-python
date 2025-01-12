@@ -1,7 +1,7 @@
 from qrcode import genqr
 from visualization import render_qr
-from utils import handle_error, console_log
-from argparse import ArgumentParser, RawDescriptionHelpFormatter
+from utils import handle_error, console_log, CustomArgParser
+from argparse import RawDescriptionHelpFormatter
 
 
 def main():
@@ -21,7 +21,7 @@ def main():
         --verbosity, -v (int): Verbosity level of the script (default: 0).
     """
 
-    parser = ArgumentParser(prog = 'qrgen',
+    parser = CustomArgParser(prog = 'qrgen',
                             formatter_class = RawDescriptionHelpFormatter,
                             usage = '''qrgen [-h] --l <link> [--output <output>] [--resolution <resolution>] 
              [--minversion <minversion>] [--maxversion <maxversion>] [--ecl <ecl>] [--verbosity <verbosity>]''',
@@ -41,7 +41,10 @@ minimum and maximum versions, and error correction level.''',
     parser.add_argument('--ecl', '-e', default = 'M', type = str, help = 'Minimum error correction level: L (7%%), M (15%%), Q (25%%), H (30%%) (default: M).', required = False)
     parser.add_argument('--verbosity', '-v', default = 0, type = int, help = 'Verbosity level of the script (default: 0).', required = False)
 
-    args = parser.parse_args()
+    try:
+        args = parser.parse_args()
+    except Exception as e:
+        handle_error(e, 0)
 
     if check_encoding(args.data):
         console_log("Data is in UTF-8 format.", 'success', args.verbosity, 0)

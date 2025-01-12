@@ -1,7 +1,7 @@
 import os
 from qrgen import gen_qr, check_encoding
-from utils import console_log, handle_error, PathError
-from argparse import ArgumentParser, RawDescriptionHelpFormatter
+from utils import console_log, handle_error, CustomArgParser
+from argparse import RawDescriptionHelpFormatter
 
 def main(): 
     """
@@ -11,7 +11,7 @@ def main():
     It validates the input data, generates the QR Codes, and saves them to the specified output directory.
     """
 
-    parser = ArgumentParser(prog = 'bulkgen',
+    parser = CustomArgParser(prog = 'bulkgen',
                             formatter_class = RawDescriptionHelpFormatter,
                             usage = '''bulkgen [-h] --file <file> [--output <output>] [--resolution <resolution>] 
              [--minversion <minversion>] [--maxversion <maxversion>] [--ecl <ecl>] [--verbosity <verbosity>]''',
@@ -32,7 +32,10 @@ directory, resolution, min and maxm versions, error correction level and extensi
     parser.add_argument('--extension', '-ext', default = 'png', type = str, help = 'Output format of the image (default: .png).', required = False)
     parser.add_argument('--verbosity', '-v', default = 0, type = int, help = 'Verbosity level of the script (default: 0).', required = False)
 
-    args = parser.parse_args()
+    try:
+        args = parser.parse_args()
+    except Exception as e:
+        handle_error(e, 0)
 
     if not os.path.exists(args.output):
         try:
