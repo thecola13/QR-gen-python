@@ -42,7 +42,7 @@ directory, resolution, min and maxm versions, error correction level and extensi
         else:
             console_log(f"Output directory {args.output} created successfully.", 'success', args.verbosity, 2)
 
-    with open(args.file, 'r', encoding = 'utf-8') as f:
+    with open(args.file, 'r') as f:
         data = f.readlines()
         for i, line in enumerate(data):
             if check_encoding(line):
